@@ -84,6 +84,10 @@ exports.pick = function (callback, options) {
     exec(fn, null, 'Printer', 'pick', [params]);
 };
 
+exports.printText = function (text) {
+    exec(null, null, 'Printer', 'printText', "un text");
+}
+
 /**
  * Sends the content to the Printing Framework.
  *

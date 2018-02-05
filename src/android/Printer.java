@@ -33,6 +33,19 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.os.Handler;
+import android.serialport.api.SerialPortClass;
+import android.serialport.api.SerialPortClass.SERIALPORT;
+import android.serialport.api.SerialPortDataReceivedPrint;
+import android.util.Log;
+
+import com.pda3505.R;
+import com.pda3505.helper.printer.Device;
+import com.pda3505.helper.printer.PrintService;
+import com.pda3505.helper.printer.PrinterClass;
+
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.PluginResult;
@@ -95,6 +108,8 @@ public class Printer extends CordovaPlugin {
      * Default name of the printed document (PDF-Printer).
      */
     private static final String DEFAULT_DOC_NAME = "unknown";
+
+    PrintService printservice = new PrintService();
 
     /**
      * Executes the request.
@@ -389,4 +404,28 @@ public class Printer extends CordovaPlugin {
 
         command.sendPluginResult(res);
     }
+
+    @Override
+	public boolean write(byte[] buffer) {
+
+		if(!SerialPortClass.serialPortName.equals(SERIALPORT.comPrinter)){
+			SerialPortClass.serialPortName=SERIALPORT.comPrinter;
+			SerialPortClass.serialPortHelper.Write(SerialPortClass.bt_printer);
+			try {
+				Thread.sleep(200);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		//return messageList.add(buffer);
+		SerialPortClass.serialPortHelper.Write(new byte[] { 0x1b, 0x76 });
+		return SerialPortClass.serialPortHelper.Write(buffer);
+	}
+
+    @Override
+	public boolean printText(String textStr) {
+		byte[] buffer = printservice.getText(textStr);
+		return write(buffer);
+	}
 }
